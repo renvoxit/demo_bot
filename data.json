@@ -1,0 +1,69 @@
+{
+  "films": [
+    {
+      "name": "Interstellar",
+      "description": "A team of explorers travels through a wormhole in search of a new home for humanity.",
+      "rating": 8.6,
+      "genre": "Science Fiction/Adventure",
+      "actors": [
+        "Matthew McConaughey",
+        "Anne Hathaway",
+        "Jessica Chastain",
+        "Michael Caine"
+      ],
+      "poster": "https://upload.wikimedia.org/wikipedia/en/b/bc/Interstellar_film_poster.jpg"
+    },
+    {
+      "name": "The Hunger Games",
+      "description": "Katniss Everdeen volunteers for a televised competition where teenagers are forced to fight for survival.",
+      "rating": 7.2,
+      "genre": "Action/Adventure",
+      "actors": [
+        "Jennifer Lawrence",
+        "Josh Hutcherson",
+        "Liam Hemsworth",
+        "Woody Harrelson"
+      ],
+      "poster": "https://upload.wikimedia.org/wikipedia/en/4/42/HungerGamesPoster.jpg"
+    },
+    {
+      "name": "Frozen",
+      "description": "Queen Elsa accidentally traps her kingdom in eternal winter, and her sister Anna sets out to bring her home.",
+      "rating": 7.4,
+      "genre": "Animation/Fantasy",
+      "actors": [
+        "Kristen Bell",
+        "Idina Menzel",
+        "Jonathan Groff",
+        "Josh Gad"
+      ],
+      "poster": "https://upload.wikimedia.org/wikipedia/en/0/05/Frozen_%282013_film%29_poster.jpg"
+    },
+    {
+      "name": "The Lion King",
+      "description": "Young lion prince Simba leaves his kingdom after tragedy and later returns to accept his place as king.",
+      "rating": 8.5,
+      "genre": "Animation/Adventure",
+      "actors": [
+        "Matthew Broderick",
+        "James Earl Jones",
+        "Jeremy Irons",
+        "Moira Kelly"
+      ],
+      "poster": "https://upload.wikimedia.org/wikipedia/en/3/3d/The_Lion_King_poster.jpg"
+    },
+    {
+      "name": "Barbie",
+      "description": "Barbie leaves Barbieland for the real world after questioning her perfect life and identity.",
+      "rating": 6.9,
+      "genre": "Adventure/Comedy",
+      "actors": [
+        "Margot Robbie",
+        "Ryan Gosling",
+        "America Ferrera",
+        "Kate McKinnon"
+      ],
+      "poster": "https://upload.wikimedia.org/wikipedia/en/0/0b/Barbie_2023_poster.jpg"
+    }
+  ]
+}
