@@ -1,6 +1,5 @@
-import unittest
 import asyncio
-from types import SimpleNamespace
+import unittest
 
 from create_films import film_rating
 from fsm import CreateFilm
@@ -36,16 +35,16 @@ class MockFSMContext:
 
 class TestCreateFilmFSM(unittest.TestCase):
     def test_invalid_rating_non_numeric(self):
-        msg = MockMessage("не число")
+        msg = MockMessage("not a number")
         state = MockFSMContext()
         asyncio.run(film_rating(msg, state))
-        self.assertTrue(any("Некоректний" in r for r in msg.responses))
+        self.assertTrue(any("Invalid rating" in response for response in msg.responses))
 
     def test_invalid_rating_out_of_range(self):
         msg = MockMessage("15")
         state = MockFSMContext()
         asyncio.run(film_rating(msg, state))
-        self.assertTrue(any("Некоректний" in r for r in msg.responses))
+        self.assertTrue(any("Invalid rating" in response for response in msg.responses))
 
     def test_valid_rating(self):
         msg = MockMessage("8.5")

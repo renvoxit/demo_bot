@@ -1,12 +1,13 @@
-from data import add_film
-from models import Film
-from aiogram import Router, html
-from aiogram.types import Message, ReplyKeyboardRemove
-from aiogram.fsm.context import FSMContext
-from aiogram.filters import Command
-from fsm import CreateFilm
 import logging
-from aiogram.filters import StateFilter
+
+from aiogram import Router, html
+from aiogram.filters import Command, StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, ReplyKeyboardRemove
+
+from data import add_film
+from fsm import CreateFilm
+from models import Film
 
 film_create_router = Router()
 
@@ -14,7 +15,7 @@ film_create_router = Router()
 @film_create_router.message(Command("cancel"), StateFilter("*"))
 async def cancel_any_state(message: Message, state: FSMContext) -> None:
     await state.clear()
-    await message.answer("Дію скасовано.", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Action cancelled.", reply_markup=ReplyKeyboardRemove())
 
 
 @film_create_router.message(Command("create_film"))
@@ -26,7 +27,7 @@ async def film_create(message: Message, state: FSMContext) -> None:
     )
     await state.set_state(CreateFilm.name)
     await message.answer(
-        "Введіть назву фільму.",
+        "Enter the film title.",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -36,7 +37,7 @@ async def film_name(message: Message, state: FSMContext) -> None:
     await state.update_data(name=message.text)
     await state.set_state(CreateFilm.description)
     await message.answer(
-        "Введіть опис фільму.",
+        "Enter the film description.",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -46,7 +47,7 @@ async def film_description(message: Message, state: FSMContext) -> None:
     await state.update_data(description=message.text)
     await state.set_state(CreateFilm.rating)
     await message.answer(
-        "Вкажіть рейтинг фільму від 0 до 10.",
+        "Enter the film rating from 0 to 10.",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -58,13 +59,13 @@ async def film_rating(message: Message, state: FSMContext) -> None:
         if not (0 <= rating <= 10):
             raise ValueError()
     except ValueError:
-        await message.answer("Некоректний рейтинг. Введіть число від 0 до 10.")
+        await message.answer("Invalid rating. Enter a number from 0 to 10.")
         return
 
     await state.update_data(rating=rating)
     await state.set_state(CreateFilm.genre)
     await message.answer(
-        "Введіть жанр фільму.",
+        "Enter the film genre.",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -74,8 +75,8 @@ async def film_genre(message: Message, state: FSMContext) -> None:
     await state.update_data(genre=message.text)
     await state.set_state(CreateFilm.actors)
     await message.answer(
-        text="Введіть акторів фільму через кому.\n"
-             + html.bold("Наприклад: Emma Stone, Ryan Gosling"),
+        text="Enter the actors separated by commas.\n"
+        + html.bold("Example: Emma Stone, Ryan Gosling"),
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -84,13 +85,13 @@ async def film_genre(message: Message, state: FSMContext) -> None:
 async def film_actors(message: Message, state: FSMContext) -> None:
     actors = [actor.strip() for actor in message.text.split(",") if actor.strip()]
     if not actors:
-        await message.answer("Додайте хоча б одного актора.")
+        await message.answer("Add at least one actor.")
         return
 
     await state.update_data(actors=actors)
     await state.set_state(CreateFilm.poster)
     await message.answer(
-        "Введіть посилання на постер фільму.",
+        "Enter the film poster URL.",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -105,6 +106,6 @@ async def film_poster(message: Message, state: FSMContext) -> None:
     add_film(film.model_dump())
 
     await message.answer(
-        f"Фільм <b>{html.quote(film.name)}</b> успішно додано!",
+        f"Film <b>{html.quote(film.name)}</b> has been added successfully!",
         reply_markup=ReplyKeyboardRemove(),
     )

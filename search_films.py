@@ -1,9 +1,11 @@
+import logging
+
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-import logging
+from aiogram.types import Message
+
 from data import get_films, save_films
 
 search_films_router = Router()
@@ -11,11 +13,11 @@ search_films_router = Router()
 
 def format_film(film: dict) -> str:
     return (
-        f"<b>Назва:</b> {film['name']}\n"
-        f"<b>Опис:</b> {film['description']}\n"
-        f"<b>Рейтинг:</b> {film['rating']}\n"
-        f"<b>Жанр:</b> {film['genre']}\n"
-        f"<b>Актори:</b> {', '.join(film['actors'])}"
+        f"<b>Title:</b> {film['name']}\n"
+        f"<b>Description:</b> {film['description']}\n"
+        f"<b>Rating:</b> {film['rating']}\n"
+        f"<b>Genre:</b> {film['genre']}\n"
+        f"<b>Actors:</b> {', '.join(film['actors'])}"
     )
 
 
@@ -34,23 +36,25 @@ class SearchFilm(StatesGroup):
 @search_films_router.message(Command("search_film"))
 async def search_film(message: Message, state: FSMContext) -> None:
     logging.info(
-        f"User {message.from_user.username} ({message.from_user.id}) вызвал команду /search_film")
+        "User %s (%s) called /search_film",
+        message.from_user.username,
+        message.from_user.id,
+    )
     await state.set_state(SearchFilm.search_query)
-    await message.answer("Введіть назву фільму для пошуку:")
+    await message.answer("Enter the film title to search for:")
 
 
 @search_films_router.message(SearchFilm.search_query)
 async def process_search_query(message: Message, state: FSMContext) -> None:
     query = message.text.casefold().strip()
     films = get_films()
-
     results = [film for film in films if query in film["name"].casefold()]
 
     if results:
         for film in results:
             await message.answer(format_film(film))
     else:
-        await message.answer("Фільм не знайдено.")
+        await message.answer("Film not found.")
     await state.clear()
 
 
@@ -61,9 +65,12 @@ class FilterFilm(StatesGroup):
 @search_films_router.message(Command("filter_films"))
 async def filter_films(message: Message, state: FSMContext) -> None:
     logging.info(
-        f"User {message.from_user.username} ({message.from_user.id}) вызвал команду /filter_films")
+        "User %s (%s) called /filter_films",
+        message.from_user.username,
+        message.from_user.id,
+    )
     await state.set_state(FilterFilm.filter_criteria)
-    await message.answer("Введіть жанр для фільтрації фільмів:")
+    await message.answer("Enter a genre to filter films:")
 
 
 @search_films_router.message(FilterFilm.filter_criteria)
@@ -76,7 +83,7 @@ async def process_filter_criteria(message: Message, state: FSMContext) -> None:
         for film in filtered:
             await message.answer(format_film(film))
     else:
-        await message.answer("Фільм за таким жанром не знайдено.")
+        await message.answer("No films found for this genre.")
     await state.clear()
 
 
@@ -87,9 +94,12 @@ class DeleteFilm(StatesGroup):
 @search_films_router.message(Command("delete_film"))
 async def delete_film(message: Message, state: FSMContext) -> None:
     logging.info(
-        f"User {message.from_user.username} ({message.from_user.id}) вызвал команду /delete_film")
+        "User %s (%s) called /delete_film",
+        message.from_user.username,
+        message.from_user.id,
+    )
     await state.set_state(DeleteFilm.delete_query)
-    await message.answer("Введіть назву фільму, який бажаєте видалити:")
+    await message.answer("Enter the title of the film you want to delete:")
 
 
 @search_films_router.message(DeleteFilm.delete_query)
@@ -100,11 +110,11 @@ async def process_delete_query(message: Message, state: FSMContext) -> None:
     if film_index is not None:
         deleted_film = films.pop(film_index)
         save_films(films)
-        await message.answer(f"Фільм <b>{deleted_film['name']}</b> успішно видалено.")
+        await message.answer(f"Film <b>{deleted_film['name']}</b> has been deleted successfully.")
         await state.clear()
         return
 
-    await message.answer("Фільм не знайдено.")
+    await message.answer("Film not found.")
     await state.clear()
 
 
@@ -116,9 +126,12 @@ class EditFilm(StatesGroup):
 @search_films_router.message(Command("edit_film"))
 async def edit_film(message: Message, state: FSMContext) -> None:
     logging.info(
-        f"User {message.from_user.username} ({message.from_user.id}) вызвал команду /edit_film")
+        "User %s (%s) called /edit_film",
+        message.from_user.username,
+        message.from_user.id,
+    )
     await state.set_state(EditFilm.edit_query)
-    await message.answer("Введіть назву фільму, який бажаєте редагувати:")
+    await message.answer("Enter the title of the film you want to edit:")
 
 
 @search_films_router.message(EditFilm.edit_query)
@@ -128,11 +141,11 @@ async def process_edit_query(message: Message, state: FSMContext) -> None:
 
     if film_index is not None:
         await state.update_data(film_index=film_index)
-        await message.answer("Введіть новий опис фільму:")
+        await message.answer("Enter the new film description:")
         await state.set_state(EditFilm.edit_description)
         return
 
-    await message.answer("Фільм не знайдено.")
+    await message.answer("Film not found.")
     await state.clear()
 
 
@@ -143,7 +156,9 @@ async def update_film_description(message: Message, state: FSMContext) -> None:
     films = get_films()
     films[film_index]["description"] = message.text
     save_films(films)
-    await message.answer(f"Опис фільму <b>{films[film_index]['name']}</b> успішно оновлено.")
+    await message.answer(
+        f"The description for <b>{films[film_index]['name']}</b> has been updated successfully."
+    )
     await state.clear()
 
 
@@ -155,9 +170,12 @@ class RateFilm(StatesGroup):
 @search_films_router.message(Command("rate_film"))
 async def rate_film(message: Message, state: FSMContext) -> None:
     logging.info(
-        f"User {message.from_user.username} ({message.from_user.id}) вызвал команду /rate_film")
+        "User %s (%s) called /rate_film",
+        message.from_user.username,
+        message.from_user.id,
+    )
     await state.set_state(RateFilm.rate_query)
-    await message.answer("Введіть назву фільму, який бажаєте оцінити:")
+    await message.answer("Enter the title of the film you want to rate:")
 
 
 @search_films_router.message(RateFilm.rate_query)
@@ -167,11 +185,11 @@ async def process_rate_query(message: Message, state: FSMContext) -> None:
 
     if film_index is not None:
         await state.update_data(film_index=film_index)
-        await message.answer("Введіть новий рейтинг (від 1 до 10):")
+        await message.answer("Enter the new rating (from 1 to 10):")
         await state.set_state(RateFilm.set_rating)
         return
 
-    await message.answer("Фільм не знайдено.")
+    await message.answer("Film not found.")
     await state.clear()
 
 
@@ -186,9 +204,11 @@ async def set_film_rating(message: Message, state: FSMContext) -> None:
         if 1 <= rating <= 10:
             films[film_index]["rating"] = rating
             save_films(films)
-            await message.answer(f"Рейтинг фільму <b>{films[film_index]['name']}</b> оновлено на {rating}.")
+            await message.answer(
+                f"The rating for <b>{films[film_index]['name']}</b> has been updated to {rating}."
+            )
             await state.clear()
         else:
-            await message.answer("Некоректний рейтинг. Введіть число від 1 до 10.")
+            await message.answer("Invalid rating. Enter a number from 1 to 10.")
     except ValueError:
-        await message.answer("Некоректний ввід. Введіть число.")
+        await message.answer("Invalid input. Enter a number.")

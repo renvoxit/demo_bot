@@ -1,11 +1,10 @@
-import unittest
 import asyncio
+import unittest
 from pathlib import Path
 
-from search_films import process_rate_query, set_film_rating
-from search_films import RateFilm
 import data
 from data import save_films
+from search_films import RateFilm, process_rate_query, set_film_rating
 
 TEST_FILE_PATH = Path("test_data.json")
 
@@ -40,16 +39,15 @@ class MockFSMContext:
 
 class TestRateFilmFSM(unittest.TestCase):
     def setUp(self):
-        self.data_file = TEST_FILE_PATH
         self.original_data_file = data.DATA_FILE
-        data.DATA_FILE = self.data_file
+        data.DATA_FILE = TEST_FILE_PATH
         self.film = {
             "name": "Rateable Film",
             "description": "Desc",
             "rating": 4.0,
             "genre": "Genre",
             "actors": ["A", "B"],
-            "poster": "http://poster.jpg"
+            "poster": "http://poster.jpg",
         }
         save_films([self.film])
 
@@ -68,7 +66,7 @@ class TestRateFilmFSM(unittest.TestCase):
         state = MockFSMContext()
         state.data["film_index"] = 0
         asyncio.run(set_film_rating(msg, state))
-        self.assertIn("оновлено на 9.0", msg.responses[0])
+        self.assertIn("updated to 9.0", msg.responses[0])
 
 
 if __name__ == "__main__":

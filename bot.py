@@ -1,6 +1,3 @@
-from external import async_log_function_call
-from config import BOT_TOKEN
-from search_films import search_films_router
 import asyncio
 import logging
 import sys
@@ -8,20 +5,17 @@ import sys
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.types import Message, CallbackQuery, URLInputFile
+from aiogram.types import CallbackQuery, Message, URLInputFile
 
-
-from commands import (
-    FILMS_COMMAND,
-    START_COMMAND,
-    BOT_COMMANDS,
-)
-from data import get_films
-from models import Film
-from keyboard import films_keyboard_markup, FilmCallback
+from commands import BOT_COMMANDS, FILMS_COMMAND, START_COMMAND
+from config import BOT_TOKEN
 from create_films import film_create_router
+from data import get_films
+from external import async_log_function_call
+from keyboard import FilmCallback, films_keyboard_markup
+from models import Film
+from search_films import search_films_router
 
-# Logging setup
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -32,7 +26,6 @@ logging.basicConfig(
 )
 
 dp = Dispatcher()
-
 dp.include_router(film_create_router)
 dp.include_router(search_films_router)
 
@@ -46,8 +39,8 @@ async def command_start_handler(message: Message) -> None:
         message.from_user.id,
     )
     await message.answer(
-        "Привіт! Я бот для персональної колекції фільмів: можу показати список, "
-        "знайти фільм, відфільтрувати за жанром і додати новий запис."
+        "Hi! I can help you manage a personal movie collection: browse films, "
+        "search by title, filter by genre, and add new records."
     )
 
 
@@ -61,13 +54,13 @@ async def command_films_handler(message: Message) -> None:
     )
     films = get_films()
     if not films:
-        await message.answer("У колекції поки немає фільмів. Додайте перший через /create_film.")
+        await message.answer("Your movie collection is empty. Add the first film with /create_film.")
         return
 
     markup = films_keyboard_markup(films_list=films)
     await message.answer(
-        "Перелік фільмів. Натисніть на назву для перегляду деталей.",
-        reply_markup=markup
+        "Here is your movie list. Select a title to view details.",
+        reply_markup=markup,
     )
 
 
@@ -83,31 +76,29 @@ async def callback_film(callback: CallbackQuery, callback_data: FilmCallback) ->
     film_id = callback_data.id
     films = get_films()
     if film_id >= len(films):
-        await callback.answer("Фільм не знайдено.", show_alert=True)
+        await callback.answer("Film not found.", show_alert=True)
         return
 
-    film_data = films[film_id]
-    film = Film(**film_data)
-
+    film = Film(**films[film_id])
     text = (
-        f"Фільм: {film.name}\n"
-        f"Опис: {film.description}\n"
-        f"Рейтинг: {film.rating}\n"
-        f"Жанр: {film.genre}\n"
-        f"Актори: {', '.join(film.actors)}\n"
+        f"Film: {film.name}\n"
+        f"Description: {film.description}\n"
+        f"Rating: {film.rating}\n"
+        f"Genre: {film.genre}\n"
+        f"Actors: {', '.join(film.actors)}\n"
     )
 
     await callback.message.answer_photo(
         caption=text,
         photo=URLInputFile(
             film.poster,
-            filename=f"{film.name}_poster.{film.poster.split('.')[-1]}"
-        )
+            filename=f"{film.name}_poster.{film.poster.split('.')[-1]}",
+        ),
     )
     await callback.answer()
 
 
-async def main():
+async def main() -> None:
     if not BOT_TOKEN:
         raise RuntimeError(
             "BOT_TOKEN is not set. Add it to your environment before starting the bot."
@@ -120,6 +111,7 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(BOT_COMMANDS)
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

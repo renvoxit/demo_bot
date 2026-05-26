@@ -1,10 +1,10 @@
-import unittest
 import asyncio
+import unittest
 from pathlib import Path
 
-from search_films import process_delete_query
 import data
-from data import save_films, get_films
+from data import get_films, save_films
+from search_films import process_delete_query
 
 TEST_FILE_PATH = Path("test_data.json")
 
@@ -28,16 +28,15 @@ class MockFSMContext:
 
 class TestDeleteFilmFSM(unittest.TestCase):
     def setUp(self):
-        self.data_file = TEST_FILE_PATH
         self.original_data_file = data.DATA_FILE
-        data.DATA_FILE = self.data_file
+        data.DATA_FILE = TEST_FILE_PATH
         self.film = {
             "name": "Deletable Film",
             "description": "Desc",
             "rating": 4.0,
             "genre": "Genre",
             "actors": ["A", "B"],
-            "poster": "http://poster.jpg"
+            "poster": "http://poster.jpg",
         }
         save_films([self.film])
 
@@ -48,9 +47,8 @@ class TestDeleteFilmFSM(unittest.TestCase):
         msg = MockMessage("Deletable Film")
         state = MockFSMContext()
         asyncio.run(process_delete_query(msg, state))
-        self.assertIn("успішно видалено", msg.responses[0])
-        films = get_films()
-        self.assertEqual(len(films), 0)
+        self.assertIn("deleted successfully", msg.responses[0])
+        self.assertEqual(len(get_films()), 0)
 
 
 if __name__ == "__main__":

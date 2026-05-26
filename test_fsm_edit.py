@@ -1,12 +1,10 @@
-import unittest
 import asyncio
+import unittest
 from pathlib import Path
-
-from search_films import process_edit_query, update_film_description
-from search_films import EditFilm
 
 import data
 from data import save_films
+from search_films import EditFilm, process_edit_query, update_film_description
 
 TEST_FILE_PATH = Path("test_data.json")
 
@@ -41,16 +39,15 @@ class MockFSMContext:
 
 class TestEditFilmFSM(unittest.TestCase):
     def setUp(self):
-        self.data_file = TEST_FILE_PATH
         self.original_data_file = data.DATA_FILE
-        data.DATA_FILE = self.data_file
+        data.DATA_FILE = TEST_FILE_PATH
         self.initial_film = {
             "name": "Editable Film",
             "description": "Old description",
             "rating": 5.0,
             "genre": "Drama",
             "actors": ["X", "Y"],
-            "poster": "http://poster.jpg"
+            "poster": "http://poster.jpg",
         }
         save_films([self.initial_film])
 
@@ -69,7 +66,7 @@ class TestEditFilmFSM(unittest.TestCase):
         state = MockFSMContext()
         state.data["film_index"] = 0
         asyncio.run(update_film_description(msg, state))
-        self.assertIn("успішно оновлено", msg.responses[0])
+        self.assertIn("updated successfully", msg.responses[0])
 
 
 if __name__ == "__main__":
