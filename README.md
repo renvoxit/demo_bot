@@ -38,11 +38,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-4. Add your Telegram token to `.env`, then export it before starting the bot:
-
-```powershell
-$env:BOT_TOKEN = "your_telegram_bot_token"
-```
+4. Add your Telegram token to `.env`. The bot loads this file automatically on startup.
 
 5. Run the bot:
 
