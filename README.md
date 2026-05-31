@@ -67,3 +67,9 @@ python -m unittest discover -v
 ## Security Note
 
 Never commit a real Telegram bot token. Store it in environment variables or a local `.env` file that is ignored by Git.
+
+## Author
+
+Built by Renvoxit Systems.
+
+Portfolio: https://renvoxit.com
